@@ -1,7 +1,4 @@
 import requests
-from pprint import pprint
-
-text = 'python'
 
 
 def get_vacancies(text):
@@ -34,4 +31,11 @@ def count_key_skills(vacancies):
     return key_skills_dict
 
 
-pprint(count_key_skills(get_vacancies('python')))
+def get_most_demanded_skills(number, skills_dict):
+    skills_list = []
+    for key, value in skills_dict.items():
+        if value > 1:
+            skills_list.append((value, key))
+    skills_list.sort(reverse=True)
+    most_demanded = skills_list[:number]
+    return most_demanded
