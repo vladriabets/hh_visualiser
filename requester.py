@@ -1,41 +1,39 @@
 import requests
+from collections import Counter
 
+def get_skills(text):
+    '''Takes an input text and returns a list of all
+    skills from hh.ru vacancies that contain this text'''
 
-def get_vacancies(text):
-    base_path = 'https://api.hh.ru' + '/vacancies' + \
-          '?area=2&specialization=1&text={}'.format(text)
-    base = requests.get(base_path)
-    found = base.json()['found']
+    base_path = 'https://api.hh.ru' + '/vacancies'
+
+    specialization_path = base_path + '?area=2&specialization=1&text={}'.format(text)
+    found = requests.get(specialization_path).json()['found']
     page = 0
+
     vacancies = []
+
     while (page - 1) * 100 < found:
-        path = 'https://api.hh.ru' + '/vacancies' + \
-              '?area=2&specialization=1&per_page=100&page={}&text={}'.format(page, text)
-        response = requests.get(path)
-        for i in response.json()['items']:
-            vacancies.append(i)
+        vacancies_pages_path = base_path +\
+        '?area=2&specialization=1&per_page=100&page={}&text={}'.format(page, text)
+        vacancies_pages_get = requests.get(vacancies_pages_path)
+        for item in vacancies_pages_get.json()['items']:
+            vacancies.append(item)
         page += 1
-    return vacancies
 
+    skills = []
 
-def count_key_skills(vacancies):
-    key_skills_dict = dict()
     for vacancy in vacancies:
         vacancy_id = vacancy['id']
-        path = 'https://api.hh.ru' + '/vacancies/' + vacancy_id
-        response = requests.get(path)
-        key_skills = [skill['name'] for skill in response.json()['key_skills']]
-        for skill in key_skills:
-            key_skills_dict.setdefault(skill, 0)
-            key_skills_dict[skill] += 1
-    return key_skills_dict
+        vacancies_path = base_path + vacancy_id
+        vacancies_get = requests.get(vacancies_path)
+        skills.extend([skill['name'] for skill in response.json()['key_skills']])
+
+    return skills
 
 
-def get_most_demanded_skills(number, skills_dict):
-    skills_list = []
-    for key, value in skills_dict.items():
-        if value > 1:
-            skills_list.append((value, key))
-    skills_list.sort(reverse=True)
-    most_demanded = skills_list[:number]
-    return most_demanded
+def get_most_demanded_items(number, items):
+    '''Takes a list of items and returns a list with lenght = number,
+    of the most common items from the list provided'''
+
+    return Counter(items).most_common()[:number]
