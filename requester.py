@@ -12,6 +12,7 @@ def get_skills(text):
     page = 0
 
     vacancies = []
+    skills = []
 
     while (page - 1) * 100 < found:
         vacancies_pages_path = base_path +\
@@ -21,12 +22,10 @@ def get_skills(text):
             vacancies.append(item)
         page += 1
 
-    skills = []
-
     for vacancy in vacancies:
         vacancy_id = vacancy['id']
-        vacancies_path = base_path + vacancy_id
-        vacancies_get = requests.get(vacancies_path)
+        vacancies_path = base_path + '/' + vacancy_id
+        response = requests.get(vacancies_path)
         skills.extend([skill['name'] for skill in response.json()['key_skills']])
 
     return skills
