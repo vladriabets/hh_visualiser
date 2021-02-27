@@ -1,4 +1,5 @@
 import requests
+import sys
 from collections import Counter
 
 def get_skills(text):
@@ -36,3 +37,17 @@ def get_most_demanded_items(number, items):
     of the most common items from the list provided'''
 
     return Counter(items).most_common()[:number]
+
+def main():
+    main_text = sys.argv[1]
+    try:
+        main_number = int(sys.argv[2])
+    except ValueError:
+        print('Please enter number of skills after a secialization name')
+        return 1
+
+    main_skills = get_skills(main_text)
+    return (get_most_demanded_items(main_number, main_skills))
+
+if __name__ == "__main__":
+    print(main())
