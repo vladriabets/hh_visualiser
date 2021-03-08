@@ -4,23 +4,13 @@ import aiohttp
 from time import time
 from collections import Counter
 
-# async functions
 
+# async functions
 
 async def request_json(url, session):
     async with session.get(url) as response:
         json_result = await response.json()
         return json_result
-
-
-# async def request_list(url_list, session):
-#     tasks = []
-#
-#     for url in url_list:
-#         request_task = asyncio.create_task(request_json(url, session))
-#         tasks.append(request_task)
-#         response_list = await asyncio.gather(*tasks)
-#         return response_list
 
 
 async def get_vacancies(base_path, text, session):
@@ -29,13 +19,18 @@ async def get_vacancies(base_path, text, session):
     found = response_specs['found']
     pages = [i for i in range(int((found / 100) + 1))]
 
-    tasks = []
     vacancies = []
+    tasks = []
 
     for page in pages:
         vacancies_pages_path = base_path + \
                                '?area=2&specialization=1&per_page=100&page={}&text={}'.format(page, text)
-        vacancies_pages = await request_json(vacancies_pages_path, session)
+        task = asyncio.create_task(request_json(vacancies_pages_path, session))
+        tasks.append(task)
+
+    results = await asyncio.gather(*tasks)
+
+    for vacancies_pages in results:
         vacancies.extend([item for item in vacancies_pages['items']])
 
     return vacancies
@@ -43,11 +38,20 @@ async def get_vacancies(base_path, text, session):
 
 async def get_skills(base_path, vacancies, session):
     skills = []
+    tasks = []
 
     for vacancy in vacancies:
         vacancy_path = base_path + '/' + vacancy['id']
-        vacancies_json = await request_json(vacancy_path, session)
-        skills.extend([skill['name'] for skill in vacancies_json['key_skills']])
+        task = asyncio.create_task(request_json(vacancy_path, session))
+        tasks.append(task)
+
+    results = await asyncio.gather(*tasks)
+
+    for vacancies_json in results:
+        try:
+            skills.extend([skill['name'] for skill in vacancies_json['key_skills']])
+        except KeyError:
+            continue
 
     return skills
 
@@ -73,8 +77,8 @@ def get_args():
 
     return text, number
 
-# entry point
 
+# entry point
 
 async def main():
     t0 = time()
