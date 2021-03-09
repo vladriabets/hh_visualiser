@@ -1,7 +1,6 @@
 import sys
 import asyncio
 import aiohttp
-from time import time
 from collections import Counter
 
 
@@ -80,28 +79,22 @@ def get_args():
 
 # entry point
 
-async def main():
-    t0 = time()
-
-    main_text_and_num = get_args()
-    main_text = main_text_and_num[0]
-    main_number = main_text_and_num[1]
+async def skills_count(main_text, main_number):
 
     base_path = 'https://api.hh.ru' + '/vacancies'
-    session = aiohttp.ClientSession(connector=aiohttp.TCPConnector(ssl=False))
 
-    vacancies = await get_vacancies(base_path, main_text, session)
-    skills = await get_skills(base_path, vacancies, session)
-    items = get_most_demanded_items(main_number, skills)
+    async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(ssl=False)) as session:
+        vacancies = await get_vacancies(base_path, main_text, session)
+        skills = await get_skills(base_path, vacancies, session)
+        items = get_most_demanded_items(main_number, skills)
 
-    await session.close()
-
-    end_time = time()
-
-    print(end_time - t0)
-    print(items)
     return items
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    user_input = get_args()
+
+    main_text = user_input[0]
+    main_number = user_input[1]
+
+    asyncio.run(skills_count(main_text, main_number))

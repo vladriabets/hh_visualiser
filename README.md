@@ -1,5 +1,3 @@
-Это  приложение для визуализации требований к вакансиям, найденным по ключевому слову.
+This application will visualize required employee tasks from hh.ru job requirements founded based on a key word.
 
-Для использования приложения установите зависимости из requirements.txt, в файле visualiser.py замените значение переменной text на строку, по которой вы хотите найти вакансии на hh.ru и запустите скрипт visualiser.py.
-
-Вы получите в файле plot.png изображение графика наиболее часто указанных ключевых навыков среди вакансий, найденных по запросу.
+To use it, install dependencies from requirements.txt,
